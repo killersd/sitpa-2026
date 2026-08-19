@@ -1,0 +1,70 @@
+spring:
+  application:
+    name: sitpa
+  profiles:
+    # Perfil padrao usa H2 em memoria, para que "mvn spring-boot:run" funcione sem infraestrutura.
+    # O docker-compose sobe com SPRING_PROFILES_ACTIVE=postgres.
+    default: h2
+  jpa:
+    open-in-view: false
+    hibernate:
+      # O esquema pertence ao Flyway. "validate" garante que o mapeamento JPA e as migracoes
+      # nao se separem em silencio: divergencia derruba a aplicacao na subida, nao em producao.
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+  jackson:
+    # Datas ja saem em ISO-8601 por padrao no Jackson 3, usado pelo Spring Boot 4.
+    default-property-inclusion: non_null
+  threads:
+    virtual:
+      enabled: true
+
+server:
+  port: ${SITPA_PORTA:8090}
+  error:
+    include-message: never
+    include-stacktrace: never
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: alpha
+    tags-sorter: alpha
+  api-docs:
+    path: /v3/api-docs
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+sitpa:
+  # HMAC-SHA256 exige no minimo 32 bytes. Em producao, defina SITPA_JWT_SEGREDO no ambiente.
+  jwt-segredo: ${SITPA_JWT_SEGREDO:sitpa-segredo-de-desenvolvimento-trocar-em-producao}
+  jwt-validade-minutos: ${SITPA_JWT_VALIDADE_MINUTOS:480}
+  # Aceitam curinga. O padrao libera qualquer porta local porque o Vite muda de porta sozinho
+  # quando a 5173 esta ocupada. Em producao, informe as origens exatas em SITPA_CORS_ORIGENS.
+  cors-origens: ${SITPA_CORS_ORIGENS:http://localhost,http://localhost:*,http://127.0.0.1:*}
+  seed-inicial: ${SITPA_SEED_INICIAL:true}
+  senha-admin-inicial: ${SITPA_SENHA_ADMIN:admin123}
+  senha-triagem-inicial: ${SITPA_SENHA_TRIAGEM:triagem123}
+  regras:
+    # De quanto em quanto tempo reconciliar a base publicada com as regras do banco.
+    intervalo-reconciliacao-ms: ${SITPA_REGRAS_RECONCILIACAO_MS:60000}
+
+logging:
+  level:
+    br.com.sitpa: INFO
+    org.drools: WARN
+    org.kie: WARN

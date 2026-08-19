@@ -1,0 +1,549 @@
+/*
+  Estilo do SITPa.
+
+  Duas decisoes guiam o visual: alvos de toque grandes, porque a triagem acontece em tablet e
+  muitas vezes com luvas; e cor usada com parcimonia na interface, para que o unico elemento
+  fortemente colorido da tela seja a classificacao de risco do paciente.
+*/
+
+:root {
+  --fundo: #f4f6f8;
+  --superficie: #ffffff;
+  --superficie-alt: #eef1f5;
+  --borda: #d7dde5;
+  --texto: #16202c;
+  --texto-suave: #5a6a7d;
+  --primaria: #10527f;
+  --primaria-escura: #0c3f62;
+  --primaria-clara: #e3eef6;
+  --perigo: #b3261e;
+  --sucesso: #1b5e20;
+  --raio: 10px;
+  --sombra: 0 1px 3px rgba(16, 32, 48, 0.09), 0 1px 2px rgba(16, 32, 48, 0.06);
+  --alvo-toque: 44px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--texto);
+  background: var(--fundo);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3 {
+  margin: 0 0 0.5rem;
+  line-height: 1.25;
+}
+
+h1 {
+  font-size: 1.5rem;
+}
+
+h2 {
+  font-size: 1.2rem;
+}
+
+h3 {
+  font-size: 1rem;
+}
+
+a {
+  color: var(--primaria);
+}
+
+/* --- Estrutura --- */
+
+.app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
+.cabecalho {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1.25rem;
+  background: var(--primaria);
+  color: #fff;
+}
+
+.cabecalho .marca {
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.cabecalho .marca span {
+  font-weight: 400;
+  opacity: 0.85;
+  font-size: 0.85rem;
+  margin-left: 0.5rem;
+}
+
+.navegacao {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  flex: 1;
+}
+
+.navegacao a {
+  color: #fff;
+  text-decoration: none;
+  padding: 0.5rem 0.85rem;
+  border-radius: var(--raio);
+  min-height: var(--alvo-toque);
+  display: inline-flex;
+  align-items: center;
+  font-weight: 500;
+}
+
+.navegacao a:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.navegacao a.ativo {
+  background: rgba(255, 255, 255, 0.24);
+}
+
+.usuario-atual {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.9rem;
+}
+
+.conteudo {
+  flex: 1;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1.25rem;
+}
+
+.rodape {
+  padding: 0.75rem 1.25rem;
+  font-size: 0.8rem;
+  color: var(--texto-suave);
+  text-align: center;
+}
+
+/* --- Superficies --- */
+
+.cartao {
+  background: var(--superficie);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  box-shadow: var(--sombra);
+  padding: 1.1rem;
+  margin-bottom: 1.1rem;
+}
+
+.cartao > h2:first-child,
+.cartao > h3:first-child {
+  margin-top: 0;
+}
+
+.linha {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: flex-end;
+}
+
+.grade {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 0.75rem;
+}
+
+.entre {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* --- Formularios --- */
+
+label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--texto-suave);
+  margin-bottom: 0.25rem;
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  min-height: var(--alvo-toque);
+  padding: 0.5rem 0.65rem;
+  font: inherit;
+  color: var(--texto);
+  background: var(--superficie);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+}
+
+textarea {
+  min-height: 90px;
+  resize: vertical;
+}
+
+textarea.codigo {
+  font-family: 'Cascadia Mono', Consolas, 'Courier New', monospace;
+  font-size: 0.85rem;
+  min-height: 260px;
+  white-space: pre;
+  overflow-wrap: normal;
+  overflow-x: auto;
+}
+
+input:focus,
+select:focus,
+textarea:focus,
+button:focus-visible {
+  outline: 3px solid var(--primaria-clara);
+  outline-offset: 1px;
+  border-color: var(--primaria);
+}
+
+.campo {
+  flex: 1 1 200px;
+  min-width: 160px;
+}
+
+/* --- Botoes --- */
+
+button {
+  min-height: var(--alvo-toque);
+  padding: 0.5rem 1.1rem;
+  font: inherit;
+  font-weight: 600;
+  color: var(--texto);
+  background: var(--superficie);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  cursor: pointer;
+}
+
+button:hover:not(:disabled) {
+  background: var(--superficie-alt);
+}
+
+button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+button.primario {
+  background: var(--primaria);
+  border-color: var(--primaria);
+  color: #fff;
+}
+
+button.primario:hover:not(:disabled) {
+  background: var(--primaria-escura);
+}
+
+button.perigo {
+  color: var(--perigo);
+  border-color: #e6c3c0;
+}
+
+button.perigo:hover:not(:disabled) {
+  background: #fdf1f0;
+}
+
+button.discreto {
+  border-color: transparent;
+  background: transparent;
+  color: var(--primaria);
+}
+
+.botoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+/* --- Tabelas --- */
+
+.tabela-rolavel {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+}
+
+th,
+td {
+  text-align: left;
+  padding: 0.6rem 0.7rem;
+  border-bottom: 1px solid var(--borda);
+  vertical-align: top;
+}
+
+th {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--texto-suave);
+  white-space: nowrap;
+}
+
+tbody tr:hover {
+  background: var(--superficie-alt);
+}
+
+/* --- Classificacao de risco --- */
+
+.etiqueta-risco {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #fff;
+  white-space: nowrap;
+}
+
+.painel-risco {
+  border-radius: var(--raio);
+  padding: 1.1rem 1.25rem;
+  color: #fff;
+}
+
+.painel-risco .nivel {
+  font-size: 1.8rem;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.painel-risco .detalhes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 0.6rem 1.25rem;
+  margin-top: 0.9rem;
+}
+
+.painel-risco .detalhes dt {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  opacity: 0.85;
+}
+
+.painel-risco .detalhes dd {
+  margin: 0;
+  font-weight: 600;
+}
+
+/* --- Selecao de sintomas --- */
+
+.opcoes {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 0.6rem;
+}
+
+.opcao {
+  display: flex;
+  gap: 0.65rem;
+  align-items: flex-start;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  background: var(--superficie);
+  cursor: pointer;
+  min-height: var(--alvo-toque);
+}
+
+.opcao:hover {
+  border-color: var(--primaria);
+}
+
+.opcao.marcada {
+  border-color: var(--primaria);
+  background: var(--primaria-clara);
+}
+
+.opcao input[type='checkbox'],
+.opcao input[type='radio'] {
+  width: 22px;
+  height: 22px;
+  min-height: 22px;
+  margin-top: 2px;
+  flex: 0 0 auto;
+  accent-color: var(--primaria);
+}
+
+.opcao .rotulo {
+  font-weight: 600;
+}
+
+.opcao .auxiliar {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 400;
+  color: var(--texto-suave);
+}
+
+/* --- Passos do fluxo --- */
+
+.passos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  padding: 0;
+  list-style: none;
+  counter-reset: passo;
+}
+
+.passos li {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.35rem 0.8rem;
+  border-radius: 999px;
+  background: var(--superficie);
+  border: 1px solid var(--borda);
+  font-size: 0.85rem;
+  color: var(--texto-suave);
+}
+
+.passos li::before {
+  counter-increment: passo;
+  content: counter(passo);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--superficie-alt);
+  font-weight: 700;
+  font-size: 0.78rem;
+}
+
+.passos li.atual {
+  border-color: var(--primaria);
+  color: var(--primaria);
+  font-weight: 600;
+}
+
+.passos li.atual::before {
+  background: var(--primaria);
+  color: #fff;
+}
+
+.passos li.concluido::before {
+  background: var(--sucesso);
+  color: #fff;
+}
+
+/* --- Mensagens --- */
+
+.aviso {
+  padding: 0.7rem 0.9rem;
+  border-radius: var(--raio);
+  border: 1px solid;
+  margin-bottom: 0.9rem;
+  font-size: 0.92rem;
+}
+
+.aviso.erro {
+  color: var(--perigo);
+  background: #fdf1f0;
+  border-color: #e6c3c0;
+}
+
+.aviso.sucesso {
+  color: var(--sucesso);
+  background: #edf6ee;
+  border-color: #bcd9be;
+}
+
+.aviso.informativo {
+  color: var(--primaria-escura);
+  background: var(--primaria-clara);
+  border-color: #b9d5e8;
+}
+
+.vazio {
+  padding: 1.5rem;
+  text-align: center;
+  color: var(--texto-suave);
+}
+
+.suave {
+  color: var(--texto-suave);
+  font-size: 0.87rem;
+}
+
+.mono {
+  font-family: 'Cascadia Mono', Consolas, 'Courier New', monospace;
+  font-size: 0.85rem;
+}
+
+.barra {
+  height: 8px;
+  border-radius: 999px;
+  background: var(--superficie-alt);
+  overflow: hidden;
+}
+
+.barra > span {
+  display: block;
+  height: 100%;
+}
+
+.tela-centralizada {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100%;
+  padding: 1.25rem;
+}
+
+.tela-centralizada .cartao {
+  width: 100%;
+  max-width: 380px;
+  margin: 0;
+}
+
+@media (max-width: 640px) {
+  .conteudo {
+    padding: 0.85rem;
+  }
+
+  .cabecalho {
+    padding: 0.7rem 0.85rem;
+  }
+}

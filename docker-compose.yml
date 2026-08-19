@@ -1,0 +1,61 @@
+name: sitpa
+
+services:
+  banco:
+    image: postgres:17-alpine
+    container_name: sitpa-banco
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-sitpa}
+      POSTGRES_USER: ${POSTGRES_USER:-sitpa}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-sitpa}
+    volumes:
+      - dados-postgres:/var/lib/postgresql/data
+    ports:
+      # Exposto so para inspecao local; em producao remova este mapeamento.
+      - "${POSTGRES_PORTA:-5432}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-sitpa} -d ${POSTGRES_DB:-sitpa}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./backend
+    container_name: sitpa-backend
+    depends_on:
+      banco:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: postgres
+      SITPA_DB_URL: jdbc:postgresql://banco:5432/${POSTGRES_DB:-sitpa}
+      SITPA_DB_USUARIO: ${POSTGRES_USER:-sitpa}
+      SITPA_DB_SENHA: ${POSTGRES_PASSWORD:-sitpa}
+      # Obrigatorio e com no minimo 32 bytes. Gere o seu: openssl rand -base64 48
+      SITPA_JWT_SEGREDO: ${SITPA_JWT_SEGREDO:?defina SITPA_JWT_SEGREDO no arquivo .env}
+      SITPA_JWT_VALIDADE_MINUTOS: ${SITPA_JWT_VALIDADE_MINUTOS:-480}
+      SITPA_SENHA_ADMIN: ${SITPA_SENHA_ADMIN:-admin123}
+      SITPA_SENHA_TRIAGEM: ${SITPA_SENHA_TRIAGEM:-triagem123}
+      SITPA_SEED_INICIAL: ${SITPA_SEED_INICIAL:-true}
+      # O navegador acessa a API pelo nginx do frontend, na mesma origem; a lista abaixo
+      # so importa se alguem chamar a API direto da porta 8090.
+      SITPA_CORS_ORIGENS: ${SITPA_CORS_ORIGENS:-http://localhost,http://localhost:*}
+    ports:
+      - "${SITPA_PORTA_BACKEND:-8090}:8090"
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: sitpa-frontend
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "${SITPA_PORTA_FRONTEND:-80}:80"
+    restart: unless-stopped
+
+volumes:
+  dados-postgres:

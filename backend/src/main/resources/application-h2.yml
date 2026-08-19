@@ -1,0 +1,12 @@
+# Perfil de desenvolvimento local: H2 em memoria rodando em modo PostgreSQL, para que as
+# migracoes Flyway sejam exatamente as mesmas usadas no banco de producao.
+spring:
+  datasource:
+    url: jdbc:h2:mem:sitpa;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+  h2:
+    console:
+      enabled: true
+      path: /h2-console

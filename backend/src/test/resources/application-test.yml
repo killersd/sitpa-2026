@@ -1,0 +1,22 @@
+# Perfil de teste: mesmo H2 em modo PostgreSQL e as mesmas migracoes Flyway do ambiente real,
+# de forma que os testes exercitem o esquema que sera entregue.
+spring:
+  datasource:
+    url: jdbc:h2:mem:sitpa-teste;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+
+sitpa:
+  jwt-segredo: segredo-de-teste-com-mais-de-32-bytes-para-hmac-sha256
+  seed-inicial: true
+  senha-admin-inicial: admin123
+  senha-triagem-inicial: triagem123
+  regras:
+    # Desliga a reconciliacao periodica: nos testes a recarga e sempre explicita.
+    intervalo-reconciliacao-ms: 3600000
+
+logging:
+  level:
+    br.com.sitpa: INFO
+    org.hibernate.SQL: WARN

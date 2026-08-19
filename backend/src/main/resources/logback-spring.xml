@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Logs legiveis no desenvolvimento e JSON em producao.
+
+  O JSON e o que torna o log realmente util em uma unidade de saude: cada triagem registrada
+  vira um evento com campos consultaveis (classificacao, regra aplicada, usuario), o que permite
+  auditar decisoes do motor sem depender de expressao regular sobre texto livre.
+  Ative com SPRING_PROFILES_ACTIVE contendo "postgres" ou definindo SITPA_LOG_JSON=true.
+-->
+<configuration>
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+
+    <springProperty scope="context" name="nomeAplicacao" source="spring.application.name" defaultValue="sitpa"/>
+
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %highlight(%-5level) [%thread] %cyan(%logger{36}) - %msg%n</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <springProfile name="postgres">
+        <!-- Declarado dentro do perfil: fora dele o appender ficaria definido e sem uso, e o
+             Logback avisaria "Appender named [JSON] not referenced" em toda subida. -->
+        <appender name="JSON" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+                <includeMdcKeyName>requisicaoId</includeMdcKeyName>
+                <includeMdcKeyName>usuario</includeMdcKeyName>
+                <customFields>{"aplicacao":"${nomeAplicacao}"}</customFields>
+                <fieldNames>
+                    <timestamp>momento</timestamp>
+                    <message>mensagem</message>
+                    <logger>origem</logger>
+                    <level>nivel</level>
+                    <thread>thread</thread>
+                </fieldNames>
+            </encoder>
+        </appender>
+        <root level="INFO">
+            <appender-ref ref="JSON"/>
+        </root>
+    </springProfile>
+
+    <springProfile name="!postgres">
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+        </root>
+    </springProfile>
+</configuration>

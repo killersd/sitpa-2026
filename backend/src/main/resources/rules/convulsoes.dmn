@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Fluxograma "Convulsoes" do Protocolo de Manchester como tabela de decisao DMN 1.4.
+
+  Cada LINHA e um discriminador clinico e cada linha e independente das demais: para
+  incluir um novo discriminador basta acrescentar uma linha <rule>, sem recompilar a
+  aplicacao (o conteudo pode ser mantido na tabela regra_protocolo e recarregado a quente).
+  A politica de acerto FIRST faz a tabela ser lida de cima para baixo, do mais grave para o
+  menos grave - a mesma leitura que o profissional faz no fluxograma impresso.
+
+  Este arquivo abre em qualquer editor DMN (Kie Sandbox, Camunda Modeler, drools-dmn-editor)
+  para revisao por profissionais nao-tecnicos.
+-->
+<definitions xmlns="https://www.omg.org/spec/DMN/20211108/MODEL/"
+             xmlns:dc="http://www.omg.org/spec/DMN/20180521/DC/"
+             xmlns:di="http://www.omg.org/spec/DMN/20180521/DI/"
+             id="sitpa-convulsoes"
+             name="TriagemConvulsoes"
+             namespace="https://sitpa.com.br/dmn/convulsoes"
+             exporter="SITPa"
+             exporterVersion="2.0.0">
+
+    <itemDefinition id="tListaSintomas" name="tListaSintomas" isCollection="true">
+        <typeRef>string</typeRef>
+    </itemDefinition>
+
+    <inputData id="entrada_sintomas" name="Sintomas">
+        <variable id="var_sintomas" name="Sintomas" typeRef="tListaSintomas"/>
+    </inputData>
+
+    <decision id="decisao_classificacao" name="Classificacao">
+        <variable id="var_classificacao" name="Classificacao" typeRef="string"/>
+        <informationRequirement id="req_sintomas">
+            <requiredInput href="#entrada_sintomas"/>
+        </informationRequirement>
+
+        <decisionTable id="tabela_convulsoes" hitPolicy="FIRST" outputLabel="Classificacao">
+            <input id="col_sintomas" label="Discriminador observado">
+                <inputExpression id="expr_sintomas" typeRef="tListaSintomas">
+                    <text>Sintomas</text>
+                </inputExpression>
+            </input>
+            <output id="col_saida" typeRef="string"/>
+
+            <!-- Emergente / Vermelho -->
+            <rule id="r_via_aerea">
+                <description>Comprometimento da via aerea</description>
+                <inputEntry id="ie_via_aerea"><text>list contains(?, "VIA_AEREA_COMPROMETIDA")</text></inputEntry>
+                <outputEntry id="oe_via_aerea"><text>"VERMELHO"</text></outputEntry>
+            </rule>
+            <rule id="r_respiracao">
+                <description>Respiracao inadequada</description>
+                <inputEntry id="ie_respiracao"><text>list contains(?, "RESPIRACAO_INADEQUADA")</text></inputEntry>
+                <outputEntry id="oe_respiracao"><text>"VERMELHO"</text></outputEntry>
+            </rule>
+            <rule id="r_choque">
+                <description>Choque</description>
+                <inputEntry id="ie_choque"><text>list contains(?, "CHOQUE")</text></inputEntry>
+                <outputEntry id="oe_choque"><text>"VERMELHO"</text></outputEntry>
+            </rule>
+            <rule id="r_convulsao_curso">
+                <description>Convulsionando no momento da triagem</description>
+                <inputEntry id="ie_convulsao_curso"><text>list contains(?, "CONVULSAO_EM_CURSO")</text></inputEntry>
+                <outputEntry id="oe_convulsao_curso"><text>"VERMELHO"</text></outputEntry>
+            </rule>
+
+            <!-- Muito urgente / Laranja -->
+            <rule id="r_consciencia">
+                <description>Alteracao do nivel de consciencia</description>
+                <inputEntry id="ie_consciencia"><text>list contains(?, "ALTERACAO_NIVEL_CONSCIENCIA")</text></inputEntry>
+                <outputEntry id="oe_consciencia"><text>"LARANJA"</text></outputEntry>
+            </rule>
+            <rule id="r_convulsao_recente">
+                <description>Crise convulsiva nas ultimas 24 horas</description>
+                <inputEntry id="ie_convulsao_recente"><text>list contains(?, "CONVULSAO_RECENTE")</text></inputEntry>
+                <outputEntry id="oe_convulsao_recente"><text>"LARANJA"</text></outputEntry>
+            </rule>
+            <rule id="r_hipoglicemia">
+                <description>Hipoglicemia</description>
+                <inputEntry id="ie_hipoglicemia"><text>list contains(?, "HIPOGLICEMIA")</text></inputEntry>
+                <outputEntry id="oe_hipoglicemia"><text>"LARANJA"</text></outputEntry>
+            </rule>
+
+            <!-- Urgente / Amarelo -->
+            <rule id="r_inconsciencia">
+                <description>Historia de inconsciencia</description>
+                <inputEntry id="ie_inconsciencia"><text>list contains(?, "HISTORIA_INCONSCIENCIA")</text></inputEntry>
+                <outputEntry id="oe_inconsciencia"><text>"AMARELO"</text></outputEntry>
+            </rule>
+            <rule id="r_cefaleia">
+                <description>Cefaleia intensa</description>
+                <inputEntry id="ie_cefaleia"><text>list contains(?, "CEFALEIA_INTENSA")</text></inputEntry>
+                <outputEntry id="oe_cefaleia"><text>"AMARELO"</text></outputEntry>
+            </rule>
+            <rule id="r_vomito">
+                <description>Vomito persistente</description>
+                <inputEntry id="ie_vomito"><text>list contains(?, "VOMITO_PERSISTENTE")</text></inputEntry>
+                <outputEntry id="oe_vomito"><text>"AMARELO"</text></outputEntry>
+            </rule>
+            <rule id="r_febre">
+                <description>Febre alta</description>
+                <inputEntry id="ie_febre"><text>list contains(?, "FEBRE_ALTA")</text></inputEntry>
+                <outputEntry id="oe_febre"><text>"AMARELO"</text></outputEntry>
+            </rule>
+
+            <!-- Pouco urgente / Verde -->
+            <rule id="r_recente">
+                <description>Problema de inicio recente</description>
+                <inputEntry id="ie_recente"><text>list contains(?, "PROBLEMA_RECENTE")</text></inputEntry>
+                <outputEntry id="oe_recente"><text>"VERDE"</text></outputEntry>
+            </rule>
+
+            <!-- Nao urgente / Azul -->
+            <rule id="r_sem_melhora">
+                <description>Problema cronico sem melhora</description>
+                <inputEntry id="ie_sem_melhora"><text>list contains(?, "PROBLEMA_SEM_MELHORA")</text></inputEntry>
+                <outputEntry id="oe_sem_melhora"><text>"AZUL"</text></outputEntry>
+            </rule>
+        </decisionTable>
+    </decision>
+</definitions>

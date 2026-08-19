@@ -1,0 +1,47 @@
+package br.com.sitpa.rules;
+
+import br.com.sitpa.domain.OrigemDecisao;
+import br.com.sitpa.rules.model.FatoTriagem;
+import br.com.sitpa.rules.model.SintomaObservado;
+import br.com.sitpa.rules.model.PropostaClassificacao;
+
+// As regras acumulam sugestoes nesta lista, fornecida pelo servico a cada sessao.
+// Coletar em lista (e nao inserir na memoria de trabalho) preserva a ORDEM DE DISPARO,
+// que o autor do protocolo controla via salience. Isso importa no desempate: quando duas
+// regras propoem a mesma gravidade, prevalece a que o protocolo mandou avaliar primeiro.
+global java.util.List propostas;
+
+// ---------------------------------------------------------------------------
+// Camada BASE do motor.
+//
+// Estas regras nao conhecem nenhum sintoma especifico: elas apenas propagam o
+// que a unidade de saude cadastrou na tela de sintomas. E isso que faz o SITPa
+// funcionar para um protocolo qualquer, recem-cadastrado, sem que ninguem
+// precise escrever DRL. As regras especializadas (arquivos seguintes) apenas
+// acrescentam raciocinio que a tabela sintoma -> gravidade nao consegue
+// expressar, como combinacoes e dependencia de idade ou gestacao.
+// ---------------------------------------------------------------------------
+
+rule "Base - gravidade cadastrada do sintoma"
+    salience -100
+    when
+        $s : SintomaObservado( classificacaoCodigo != null )
+    then
+        propostas.add(new PropostaClassificacao(
+                $s.getClassificacaoCodigo(),
+                "Base - gravidade cadastrada do sintoma",
+                "Sintoma \"" + $s.getNome() + "\" cadastrado no protocolo com gravidade " + $s.getClassificacaoCodigo() + ".",
+                OrigemDecisao.BASE));
+end
+
+// Rede de seguranca: triagem sem nenhum sintoma marcado nao pode simplesmente
+// ficar sem resposta. O servico converte a ausencia de propostas na classificacao
+// menos grave ativa do protocolo, registrando a origem como NENHUMA.
+rule "Base - nenhum sintoma observado"
+    salience -200
+    when
+        $f : FatoTriagem( quantidadeSintomas() == 0 )
+        not SintomaObservado()
+    then
+        // Nada a propor. Mantida explicitamente para tornar o caso visivel na auditoria de regras.
+end

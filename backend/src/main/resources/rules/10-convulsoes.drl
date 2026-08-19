@@ -1,0 +1,96 @@
+package br.com.sitpa.rules;
+
+import br.com.sitpa.rules.model.FatoTriagem;
+import br.com.sitpa.rules.model.PropostaClassificacao;
+
+// Lista de coleta fornecida pelo servico; ver comentario em 00-base.drl.
+global java.util.List propostas;
+
+// ---------------------------------------------------------------------------
+// Fluxograma CONVULSOES - discriminadores do Protocolo de Manchester.
+//
+// Serve como exemplo de validacao do motor: as quatro primeiras regras replicam
+// os discriminadores do fluxograma "Convulsoes" e as ultimas mostram o que so o
+// motor de regras consegue expressar - combinacoes de sintomas, dependencia de
+// idade e de gestacao, que uma tabela plana sintoma -> gravidade nao alcanca.
+//
+// A salience ordena o disparo do mais especifico para o mais generico. Alem de
+// documentar a intencao clinica, e ela que decide qual regra leva o credito
+// quando duas propoem a mesma gravidade.
+//
+// AVISO: conteudo clinico ilustrativo, para demonstracao academica. O protocolo
+// real de cada unidade deve ser cadastrado e validado por sua equipe tecnica.
+// ---------------------------------------------------------------------------
+
+// --- Raciocinio que a tabela plana sintoma -> gravidade nao expressa ---
+
+rule "Convulsoes - suspeita de estado de mal epileptico"
+    salience 130
+    when
+        $f : FatoTriagem( fluxogramaCodigo == "CONVULSOES",
+                          temTodos("CONVULSAO_EM_CURSO", "CONVULSAO_RECENTE") == true )
+    then
+        propostas.add(new PropostaClassificacao("VERMELHO", drools.getRule().getName(),
+                "Crise em curso somada a crise recente sem recuperacao entre elas: suspeita de estado de mal epileptico."));
+end
+
+rule "Convulsoes - suspeita de eclampsia"
+    salience 120
+    when
+        $f : FatoTriagem( fluxogramaCodigo == "CONVULSOES", gestante == true,
+                          temAlgum("CONVULSAO_EM_CURSO", "CONVULSAO_RECENTE") == true )
+    then
+        propostas.add(new PropostaClassificacao("VERMELHO", drools.getRule().getName(),
+                "Gestante com crise convulsiva: suspeita de eclampsia, prioridade maxima."));
+end
+
+rule "Convulsoes - crise febril em lactente"
+    salience 110
+    when
+        $f : FatoTriagem( fluxogramaCodigo == "CONVULSOES", idadeMenorQue(2) == true,
+                          temTodos("CONVULSAO_RECENTE", "FEBRE_ALTA") == true )
+    then
+        propostas.add(new PropostaClassificacao("LARANJA", drools.getRule().getName(),
+                "Crise convulsiva com febre alta em menor de 2 anos: avaliacao acelerada."));
+end
+
+// --- Discriminadores do fluxograma impresso, do mais grave ao menos grave ---
+
+rule "Convulsoes - risco imediato de vida"
+    salience 100
+    when
+        $f : FatoTriagem( fluxogramaCodigo == "CONVULSOES",
+                          temAlgum("VIA_AEREA_COMPROMETIDA", "RESPIRACAO_INADEQUADA", "CHOQUE", "CONVULSAO_EM_CURSO") == true )
+    then
+        propostas.add(new PropostaClassificacao("VERMELHO", drools.getRule().getName(),
+                "Discriminador de emergencia do fluxograma Convulsoes presente: atendimento imediato."));
+end
+
+rule "Convulsoes - comprometimento neurologico agudo"
+    salience 90
+    when
+        $f : FatoTriagem( fluxogramaCodigo == "CONVULSOES",
+                          temAlgum("ALTERACAO_NIVEL_CONSCIENCIA", "CONVULSAO_RECENTE", "HIPOGLICEMIA") == true )
+    then
+        propostas.add(new PropostaClassificacao("LARANJA", drools.getRule().getName(),
+                "Discriminador de muita urgencia do fluxograma Convulsoes presente."));
+end
+
+rule "Convulsoes - sinais de alerta"
+    salience 80
+    when
+        $f : FatoTriagem( fluxogramaCodigo == "CONVULSOES",
+                          temAlgum("HISTORIA_INCONSCIENCIA", "CEFALEIA_INTENSA", "VOMITO_PERSISTENTE", "FEBRE_ALTA") == true )
+    then
+        propostas.add(new PropostaClassificacao("AMARELO", drools.getRule().getName(),
+                "Discriminador de urgencia do fluxograma Convulsoes presente."));
+end
+
+rule "Convulsoes - queixa de inicio recente"
+    salience 70
+    when
+        $f : FatoTriagem( fluxogramaCodigo == "CONVULSOES", temSintoma("PROBLEMA_RECENTE") == true )
+    then
+        propostas.add(new PropostaClassificacao("VERDE", drools.getRule().getName(),
+                "Episodio recente sem discriminador de maior gravidade."));
+end

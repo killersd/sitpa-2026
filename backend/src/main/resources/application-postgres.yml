@@ -1,0 +1,9 @@
+# Perfil usado pelo docker-compose e por qualquer ambiente com PostgreSQL.
+spring:
+  datasource:
+    url: ${SITPA_DB_URL:jdbc:postgresql://localhost:5432/sitpa}
+    username: ${SITPA_DB_USUARIO:sitpa}
+    password: ${SITPA_DB_SENHA:sitpa}
+    hikari:
+      maximum-pool-size: ${SITPA_DB_POOL_MAX:10}
+      connection-timeout: 10000
