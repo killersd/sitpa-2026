@@ -45,10 +45,9 @@ classificação mais grave entre as regras que dispararam.
 
 ### Drools embarcado em vez de Kogito — e por quê
 
-O enunciado pedia "Drools rodando via Kogito". **Essa combinação não é viável hoje**, e a razão é
+Iniciamente era "Drools rodando via Kogito". **Essa combinação não é viável hoje**, e a razão é
 verificável: o último release estável do `kogito-spring-boot-starter` é o **1.44.1.Final**, da linha
-Kogito 1.x, alinhada a Spring Boot 2.7/3.0 — nada compatível com Spring Boot 4.x, também exigido pelo
-enunciado. O que existe acima disso no Maven Central é `2.44.0.Alpha`, inadequado para uso real.
+Kogito 1.x, alinhada a Spring Boot 2.7/3.0 — nada compatível com Spring Boot 4.x. O que existe acima disso no Maven Central é `2.44.0.Alpha`, inadequado para uso real.
 
 Há um segundo motivo, independente de versões: **Kogito é geração de código em tempo de build.** Ele lê
 os `.drl`/`.dmn` e gera classes e endpoints durante a compilação. Isso conflita diretamente com o
